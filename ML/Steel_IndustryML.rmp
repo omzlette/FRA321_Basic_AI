@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.011">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.011" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.10.011" expanded="true" height="68" name="Retrieve Data" width="90" x="45" y="34">
+        <parameter key="repository_entry" value="Steel Industry Data"/>
+      </operator>
+      <operator activated="true" class="generate_attributes" compatibility="9.10.011" expanded="true" height="82" name="Get DD, MM, YYYY and TIME" width="90" x="246" y="34">
+        <list key="function_descriptions">
+          <parameter key="Day" value="date_get([ï»¿date], DATE_UNIT_DAY)"/>
+          <parameter key="Month" value="date_get([ï»¿date], DATE_UNIT_MONTH)+1"/>
+          <parameter key="Year" value="date_get([ï»¿date], DATE_UNIT_YEAR)"/>
+        </list>
+        <parameter key="keep_all" value="true"/>
+      </operator>
+      <operator activated="true" class="date_to_numerical" compatibility="9.10.011" expanded="true" height="82" name="Date to Numerical" width="90" x="246" y="136">
+        <parameter key="attribute_name" value="ï»¿date"/>
+        <parameter key="time_unit" value="hour"/>
+        <parameter key="millisecond_relative_to" value="second"/>
+        <parameter key="second_relative_to" value="minute"/>
+        <parameter key="minute_relative_to" value="hour"/>
+        <parameter key="hour_relative_to" value="day"/>
+        <parameter key="day_relative_to" value="month"/>
+        <parameter key="week_relative_to" value="year"/>
+        <parameter key="month_relative_to" value="year"/>
+        <parameter key="quarter_relative_to" value="year"/>
+        <parameter key="half_year_relative_to" value="year"/>
+        <parameter key="year_relative_to" value="era"/>
+        <parameter key="keep_old_attribute" value="false"/>
+      </operator>
+      <operator activated="true" class="blending:rename" compatibility="9.10.011" expanded="true" height="82" name="Rename" width="90" x="246" y="238">
+        <list key="rename attributes">
+          <parameter key="ï»¿date" value="Time"/>
+        </list>
+        <parameter key="from_attribute" value=""/>
+        <parameter key="to_attribute" value=""/>
+      </operator>
+      <operator activated="true" class="select_attributes" compatibility="9.10.011" expanded="true" height="82" name="Remove CO2 and Year" width="90" x="246" y="340">
+        <parameter key="attribute_filter_type" value="subset"/>
+        <parameter key="attribute" value="CO2(tCO2)"/>
+        <parameter key="attributes" value="CO2(tCO2)|Year"/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="true"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <description align="center" color="transparent" colored="false" width="126">We will remove 'CO2' and 'Year' features because they only contain 0 and 2018, respectively.</description>
+      </operator>
+      <operator activated="true" class="remove_duplicates" compatibility="9.10.011" expanded="true" height="103" name="Remove Duplicates" width="90" x="380" y="34">
+        <parameter key="attribute_filter_type" value="all"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="treat_missing_values_as_duplicates" value="false"/>
+        <description align="center" color="transparent" colored="false" width="126">Then, we remove duplicates and replace missing values with average. (If there's any, if not then these blocks won't do anything.)</description>
+      </operator>
+      <operator activated="true" class="replace_missing_values" compatibility="9.10.011" expanded="true" height="103" name="Replace Missing Values" width="90" x="514" y="34">
+        <parameter key="return_preprocessing_model" value="false"/>
+        <parameter key="create_view" value="false"/>
+        <parameter key="attribute_filter_type" value="no_missing_values"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="default" value="average"/>
+        <list key="columns"/>
+        <description align="center" color="transparent" colored="false" width="126">We will group 'Time ' into 4 groups.&lt;br&gt;- [6 AM - 12 PM) : Morning&lt;br&gt;- [12 PM - 6 PM) : Midday&lt;br/&gt;- [6 PM - 12 AM) : Night&lt;br/&gt;- [12 AM - 6AM) : Midnight</description>
+      </operator>
+      <operator activated="true" class="discretize_by_user_specification" compatibility="9.10.011" expanded="true" height="103" name="Discretize" width="90" x="648" y="34">
+        <parameter key="return_preprocessing_model" value="false"/>
+        <parameter key="create_view" value="false"/>
+        <parameter key="attribute_filter_type" value="single"/>
+        <parameter key="attribute" value="Time"/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="numeric"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="real"/>
+        <parameter key="block_type" value="value_series"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_series_end"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <list key="classes">
+          <parameter key="Morning" value="11.0"/>
+          <parameter key="Midday" value="17.0"/>
+          <parameter key="Night" value="23.0"/>
+          <parameter key="Midnight" value="5.0"/>
+        </list>
+      </operator>
+      <operator activated="true" class="order_attributes" compatibility="9.10.011" expanded="true" height="82" name="Reorder Attributes" width="90" x="648" y="136">
+        <parameter key="sort_mode" value="user specified"/>
+        <parameter key="attribute_ordering" value="Lagging_Current_Reactive.Power_kVarh|Leading_Current_Reactive_Power_kVarh|CO2(tCO2)|Lagging_Current_Power_Factor|Leading_Current_Power_Factor|NSM|Load_Type|Day|Month|Year|Time|Day_of_week|WeekStatus|Usage_kWh"/>
+        <parameter key="use_regular_expressions" value="false"/>
+        <parameter key="handle_unmatched" value="append"/>
+        <parameter key="sort_direction" value="ascending"/>
+        <description align="center" color="transparent" colored="false" width="126">We will sort features to make it easier to read the results. The order will be:&lt;br/&gt;1. Numerical&lt;br/&gt;2. Categorical&lt;br/&gt;3. Output</description>
+      </operator>
+      <operator activated="true" class="model_simulator:one_hot_encoding" compatibility="9.10.002" expanded="true" height="103" name="One-Hot Encoding" width="90" x="782" y="34">
+        <parameter key="return_preprocessing_model" value="false"/>
+        <parameter key="create_view" value="false"/>
+        <parameter key="attribute_filter_type" value="all"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="nominal"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="file_path"/>
+        <parameter key="block_type" value="single_value"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="single_value"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="remove with too many values" value="false"/>
+        <parameter key="maximum number of values" value="100"/>
+        <parameter key="perform encoding" value="true"/>
+      </operator>
+      <operator activated="true" class="set_role" compatibility="9.10.011" expanded="true" height="82" name="Set Role" width="90" x="916" y="34">
+        <parameter key="attribute_name" value="Usage_kWh"/>
+        <parameter key="target_role" value="label"/>
+        <list key="set_additional_roles"/>
+      </operator>
+      <operator activated="true" class="multiply" compatibility="9.10.011" expanded="true" height="166" name="Duplicate" width="90" x="1050" y="34"/>
+      <operator activated="true" class="detect_outlier_distances" compatibility="9.10.011" expanded="true" height="82" name="Detect Outlier (Distances)" width="90" x="1050" y="340">
+        <parameter key="number_of_neighbors" value="10"/>
+        <parameter key="number_of_outliers" value="10"/>
+        <parameter key="distance_function" value="euclidian distance"/>
+        <description align="center" color="transparent" colored="false" width="126">We will detect and remove outliers from the dataset.</description>
+      </operator>
+      <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="9.10.011" expanded="true" height="103" name="Decision Tree" width="90" x="1184" y="136">
+        <parameter key="criterion" value="least_square"/>
+        <parameter key="maximal_depth" value="10"/>
+        <parameter key="apply_pruning" value="true"/>
+        <parameter key="confidence" value="0.1"/>
+        <parameter key="apply_prepruning" value="true"/>
+        <parameter key="minimal_gain" value="0.01"/>
+        <parameter key="minimal_leaf_size" value="2"/>
+        <parameter key="minimal_size_for_split" value="4"/>
+        <parameter key="number_of_prepruning_alternatives" value="3"/>
+      </operator>
+      <operator activated="true" class="apply_model" compatibility="9.10.011" expanded="true" height="82" name="Apply Model (2)" width="90" x="1318" y="136">
+        <list key="application_parameters"/>
+        <parameter key="create_view" value="false"/>
+      </operator>
+      <operator activated="true" class="linear_regression" compatibility="9.10.011" expanded="true" height="103" name="Linear Regression" width="90" x="1184" y="34">
+        <parameter key="feature_selection" value="M5 prime"/>
+        <parameter key="alpha" value="0.05"/>
+        <parameter key="max_iterations" value="10"/>
+        <parameter key="forward_alpha" value="0.05"/>
+        <parameter key="backward_alpha" value="0.05"/>
+        <parameter key="eliminate_colinear_features" value="true"/>
+        <parameter key="min_tolerance" value="0.05"/>
+        <parameter key="use_bias" value="true"/>
+        <parameter key="ridge" value="1.0E-8"/>
+      </operator>
+      <operator activated="true" class="apply_model" compatibility="9.10.011" expanded="true" height="82" name="Apply Linear Regression" width="90" x="1318" y="34">
+        <list key="application_parameters"/>
+        <parameter key="create_view" value="false"/>
+      </operator>
+      <operator activated="true" class="set_role" compatibility="9.10.011" expanded="true" height="82" name="Set Role (2)" width="90" x="1452" y="136">
+        <parameter key="attribute_name" value="Usage_kWh"/>
+        <parameter key="target_role" value="label"/>
+        <list key="set_additional_roles"/>
+      </operator>
+      <operator activated="true" class="performance_regression" compatibility="9.10.011" expanded="true" height="82" name="Performance (2)" width="90" x="1586" y="136">
+        <parameter key="main_criterion" value="squared_error"/>
+        <parameter key="root_mean_squared_error" value="true"/>
+        <parameter key="absolute_error" value="true"/>
+        <parameter key="relative_error" value="false"/>
+        <parameter key="relative_error_lenient" value="false"/>
+        <parameter key="relative_error_strict" value="false"/>
+        <parameter key="normalized_absolute_error" value="false"/>
+        <parameter key="root_relative_squared_error" value="false"/>
+        <parameter key="squared_error" value="true"/>
+        <parameter key="correlation" value="false"/>
+        <parameter key="squared_correlation" value="false"/>
+        <parameter key="prediction_average" value="true"/>
+        <parameter key="spearman_rho" value="false"/>
+        <parameter key="kendall_tau" value="false"/>
+        <parameter key="skip_undefined_labels" value="true"/>
+        <parameter key="use_example_weights" value="true"/>
+      </operator>
+      <operator activated="true" class="set_role" compatibility="9.10.011" expanded="true" height="82" name="Set Role (3)" width="90" x="1452" y="34">
+        <parameter key="attribute_name" value="Usage_kWh"/>
+        <parameter key="target_role" value="label"/>
+        <list key="set_additional_roles"/>
+      </operator>
+      <operator activated="true" class="performance_regression" compatibility="9.10.011" expanded="true" height="82" name="Performance" width="90" x="1586" y="34">
+        <parameter key="main_criterion" value="squared_error"/>
+        <parameter key="root_mean_squared_error" value="true"/>
+        <parameter key="absolute_error" value="true"/>
+        <parameter key="relative_error" value="false"/>
+        <parameter key="relative_error_lenient" value="false"/>
+        <parameter key="relative_error_strict" value="false"/>
+        <parameter key="normalized_absolute_error" value="false"/>
+        <parameter key="root_relative_squared_error" value="false"/>
+        <parameter key="squared_error" value="true"/>
+        <parameter key="correlation" value="false"/>
+        <parameter key="squared_correlation" value="false"/>
+        <parameter key="prediction_average" value="true"/>
+        <parameter key="spearman_rho" value="false"/>
+        <parameter key="kendall_tau" value="false"/>
+        <parameter key="skip_undefined_labels" value="true"/>
+        <parameter key="use_example_weights" value="true"/>
+      </operator>
+      <connect from_op="Retrieve Data" from_port="output" to_op="Get DD, MM, YYYY and TIME" to_port="example set input"/>
+      <connect from_op="Get DD, MM, YYYY and TIME" from_port="example set output" to_op="Date to Numerical" to_port="example set input"/>
+      <connect from_op="Date to Numerical" from_port="example set output" to_op="Rename" to_port="example set input"/>
+      <connect from_op="Rename" from_port="example set output" to_op="Remove CO2 and Year" to_port="example set input"/>
+      <connect from_op="Remove CO2 and Year" from_port="example set output" to_op="Remove Duplicates" to_port="example set input"/>
+      <connect from_op="Remove Duplicates" from_port="example set output" to_op="Replace Missing Values" to_port="example set input"/>
+      <connect from_op="Replace Missing Values" from_port="example set output" to_op="Discretize" to_port="example set input"/>
+      <connect from_op="Discretize" from_port="example set output" to_op="Reorder Attributes" to_port="example set input"/>
+      <connect from_op="Reorder Attributes" from_port="example set output" to_op="One-Hot Encoding" to_port="example set input"/>
+      <connect from_op="One-Hot Encoding" from_port="example set output" to_op="Set Role" to_port="example set input"/>
+      <connect from_op="Set Role" from_port="example set output" to_op="Duplicate" to_port="input"/>
+      <connect from_op="Duplicate" from_port="output 1" to_op="Linear Regression" to_port="training set"/>
+      <connect from_op="Duplicate" from_port="output 2" to_op="Decision Tree" to_port="training set"/>
+      <connect from_op="Duplicate" from_port="output 3" to_op="Apply Linear Regression" to_port="unlabelled data"/>
+      <connect from_op="Duplicate" from_port="output 4" to_op="Apply Model (2)" to_port="unlabelled data"/>
+      <connect from_op="Duplicate" from_port="output 5" to_op="Detect Outlier (Distances)" to_port="example set input"/>
+      <connect from_op="Decision Tree" from_port="model" to_op="Apply Model (2)" to_port="model"/>
+      <connect from_op="Apply Model (2)" from_port="labelled data" to_op="Set Role (2)" to_port="example set input"/>
+      <connect from_op="Linear Regression" from_port="model" to_op="Apply Linear Regression" to_port="model"/>
+      <connect from_op="Apply Linear Regression" from_port="labelled data" to_op="Set Role (3)" to_port="example set input"/>
+      <connect from_op="Set Role (2)" from_port="example set output" to_op="Performance (2)" to_port="labelled data"/>
+      <connect from_op="Performance (2)" from_port="performance" to_port="result 2"/>
+      <connect from_op="Set Role (3)" from_port="example set output" to_op="Performance" to_port="labelled data"/>
+      <connect from_op="Performance" from_port="performance" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="69" resized="true" width="141" x="83" y="155">First we will separate date, month, year and time.</description>
+      <description align="center" color="yellow" colored="false" height="52" resized="true" width="276" x="1283" y="255">We will try benchmarking using Linear Regression and Decision Tree</description>
+    </process>
+  </operator>
+</process>
